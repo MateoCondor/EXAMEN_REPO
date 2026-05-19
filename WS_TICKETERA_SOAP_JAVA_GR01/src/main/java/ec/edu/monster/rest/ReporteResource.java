@@ -28,4 +28,16 @@ public class ReporteResource {
                     .build();
         }
     }
+
+    @GET
+    @Path("{codigoPartido}/facturas")
+    public Response obtenerFacturas(@PathParam("codigoPartido") String codigoPartido) {
+        try {
+            return Response.ok(ticketeraService.obtenerFacturasPorPartido(codigoPartido)).build();
+        } catch (TicketeraBusinessException ex) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new RestError(ex.getMessage()))
+                    .build();
+        }
+    }
 }

@@ -5,6 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FadeInView } from '@/components/fade-in';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ActionButton } from '@/components/ticketera-ui';
+import { useAuth } from '@/hooks/use-auth';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 
 type ScreenShellProps = {
@@ -16,6 +18,7 @@ type ScreenShellProps = {
 
 export function ScreenShell({ title, subtitle, actions, children }: ScreenShellProps) {
   const { width } = useWindowDimensions();
+  const { logout } = useAuth();
   const isCompact = width < 820;
 
   return (
@@ -35,9 +38,12 @@ export function ScreenShell({ title, subtitle, actions, children }: ScreenShellP
         <SafeAreaView style={styles.safeArea}>
           <FadeInView>
             <View style={styles.header}>
-              <ThemedText type="title" style={[styles.title, isCompact && styles.titleCompact]}>
-                {title}
-              </ThemedText>
+              <View style={styles.titleRow}>
+                <ThemedText type="title" style={[styles.title, isCompact && styles.titleCompact, { flex: 1 }]}>
+                  {title}
+                </ThemedText>
+                <ActionButton label="Cerrar sesión" variant="ghost" onPress={logout} />
+              </View>
               {subtitle ? (
                 <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
                   {subtitle}
@@ -72,6 +78,12 @@ const styles = StyleSheet.create({
   header: {
     gap: Spacing.two,
     marginBottom: Spacing.four,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
   },
   title: {
     letterSpacing: 1.6,

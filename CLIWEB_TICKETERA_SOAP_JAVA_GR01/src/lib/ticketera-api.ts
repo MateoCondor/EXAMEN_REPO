@@ -20,10 +20,15 @@ export type ReporteItem = {
   totalRecaudado: number;
 };
 
-export type CompraRequest = {
-  codigoPartido: string;
+export type LineaCompra = {
   codigoLocalidad: string;
   cantidad: number;
+};
+
+export type CompraRequest = {
+  codigoPartido: string;
+  cedula: string;
+  lineas: LineaCompra[];
 };
 
 export type CompraResponse = {
@@ -32,6 +37,7 @@ export type CompraResponse = {
   subtotal: number;
   iva: number;
   total: number;
+  cedula: string;
 };
 
 type RestError = {
@@ -90,4 +96,22 @@ export function comprarBoletos(payload: CompraRequest) {
 
 export function getReporte(codigoPartido: string) {
   return request<ReporteItem[]>(`reporte/${encodeURIComponent(codigoPartido)}`);
+}
+
+export type FacturaLinea = {
+  codigoLocalidad: string;
+  cantidad: number;
+  total: number;
+};
+
+export type Factura = {
+  idFactura: number;
+  fecha: string | number | Date;
+  total: number;
+  cedula: string;
+  lineas: FacturaLinea[];
+};
+
+export function getFacturasPorPartido(codigoPartido: string) {
+  return request<Factura[]>(`reporte/${encodeURIComponent(codigoPartido)}/facturas`);
 }

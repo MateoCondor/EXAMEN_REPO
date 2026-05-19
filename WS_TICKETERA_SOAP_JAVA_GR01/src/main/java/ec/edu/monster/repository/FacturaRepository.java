@@ -14,4 +14,12 @@ public class FacturaRepository {
     public void create(Factura factura) {
         entityManager.persist(factura);
     }
+
+    public java.util.List<Factura> buscarPorPartido(String codigoPartido) {
+        return entityManager.createQuery(
+                "SELECT DISTINCT f FROM Factura f JOIN FETCH f.detalles d WHERE d.codigoPartido = :codigoPartido ORDER BY f.fecha DESC", 
+                Factura.class)
+                .setParameter("codigoPartido", codigoPartido)
+                .getResultList();
+    }
 }

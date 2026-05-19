@@ -24,10 +24,7 @@ public class CompraResource {
     @POST
     public Response comprar(CompraRequest request) {
         try {
-            Factura factura = ticketeraService.comprar(
-                    request.getCodigoPartido(),
-                    request.getCodigoLocalidad(),
-                    request.getCantidad());
+            Factura factura = ticketeraService.comprarMultiplesLocalidades(request);
 
             CompraResponse response = new CompraResponse();
             response.setIdFactura(factura.getIdFactura());
@@ -35,6 +32,7 @@ public class CompraResource {
             response.setSubtotal(factura.getSubtotal());
             response.setIva(factura.getIva());
             response.setTotal(factura.getTotal());
+            response.setCedula(factura.getCedula());
 
             return Response.ok(response).build();
         } catch (TicketeraBusinessException ex) {

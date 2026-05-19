@@ -134,19 +134,34 @@ export default function LocalidadesScreen() {
       ) : null}
 
       <View style={styles.grid}>
-        {localidades.map((localidad, index) => (
-          <FadeInView key={localidad.codigoLocalidad} delay={index * 60}>
-            <Card style={styles.localidadCard}>
-              <ThemedText type="smallBold">Localidad {localidad.codigoLocalidad}</ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                Disponibles: {localidad.disponibilidad}
-              </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                Precio: {formatMoney(localidad.precio)}
-              </ThemedText>
-            </Card>
-          </FadeInView>
-        ))}
+        {localidades.map((localidad, index) => {
+          const precioBase = localidad.precio;
+          const iva = precioBase * 0.15;
+          const total = precioBase + iva;
+          return (
+            <FadeInView key={localidad.codigoLocalidad} delay={index * 60}>
+              <Card style={styles.localidadCard}>
+                <ThemedText type="smallBold">Localidad {localidad.codigoLocalidad}</ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  Disponibles: {localidad.disponibilidad}
+                </ThemedText>
+                <View style={styles.divider} />
+                <View style={styles.priceRow}>
+                  <ThemedText type="small" themeColor="textSecondary">Precio Base:</ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary">{formatMoney(precioBase)}</ThemedText>
+                </View>
+                <View style={styles.priceRow}>
+                  <ThemedText type="small" themeColor="textSecondary">IVA (15%):</ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary">{formatMoney(iva)}</ThemedText>
+                </View>
+                <View style={styles.priceRow}>
+                  <ThemedText type="smallBold">Total Final:</ThemedText>
+                  <ThemedText type="smallBold" style={{ color: theme.accent }}>{formatMoney(total)}</ThemedText>
+                </View>
+              </Card>
+            </FadeInView>
+          );
+        })}
       </View>
     </ScreenShell>
   );
@@ -180,5 +195,15 @@ const styles = StyleSheet.create({
   },
   localidadCard: {
     gap: Spacing.one,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(128, 128, 128, 0.2)',
+    marginVertical: Spacing.half,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });

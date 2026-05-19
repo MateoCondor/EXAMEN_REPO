@@ -9,6 +9,7 @@ public class CompraResponse {
     private double subtotal;
     private double iva;
     private double total;
+    private String cedula;
 
     public CompraResponse() {
     }
@@ -51,5 +52,13 @@ public class CompraResponse {
 
     public void setTotal(double total) {
         this.total = total;
+    }
+
+    public String getCedula() {
+        return cedula;
+    }
+
+    public void setCedula(String cedula) {
+        this.cedula = cedula;
     }
 }

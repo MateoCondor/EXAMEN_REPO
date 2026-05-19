@@ -7,7 +7,7 @@ import { ActionButton, Card, FieldLabel, PillButton, TextField } from '@/compone
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { formatDate, formatMoney, formatNumber } from '@/lib/format';
-import { getPartidos, getReporte, Partido, ReporteItem } from '@/lib/ticketera-api';
+import { getPartidos, getReporte, getFacturasPorPartido, Partido, ReporteItem, Factura } from '@/lib/ticketera-api';
 import { useTheme } from '@/hooks/use-theme';
 
 export default function ReporteScreen() {
@@ -15,6 +15,7 @@ export default function ReporteScreen() {
   const [partidos, setPartidos] = useState<Partido[]>([]);
   const [codigoPartido, setCodigoPartido] = useState('');
   const [reporte, setReporte] = useState<ReporteItem[]>([]);
+  const [facturas, setFacturas] = useState<Factura[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingPartidos, setLoadingPartidos] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,8 +45,12 @@ export default function ReporteScreen() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getReporte(codigo);
-      setReporte(data);
+      const [reporteData, facturasData] = await Promise.all([
+        getReporte(codigo),
+        getFacturasPorPartido(codigo),
+      ]);
+      setReporte(reporteData);
+      setFacturas(facturasData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo generar el reporte');
     } finally {
@@ -82,6 +87,7 @@ export default function ReporteScreen() {
             onPress={() => {
               setCodigoPartido('');
               setReporte([]);
+              setFacturas([]);
               setError(null);
             }}
           />
@@ -178,6 +184,40 @@ export default function ReporteScreen() {
         </FadeInView>
       ) : null}
 
+      {facturas.length > 0 ? (
+        <FadeInView>
+          <Card>
+            <FieldLabel>Detalles de las Compras realizadas por los clientes</FieldLabel>
+            <View style={styles.facturasList}>
+              {facturas.map((factura) => (
+                <View key={factura.idFactura} style={styles.facturaCard}>
+                  <View style={styles.facturaHeader}>
+                    <ThemedText type="smallBold">Factura #{factura.idFactura}</ThemedText>
+                    <ThemedText type="small" themeColor="textSecondary">{formatDate(factura.fecha)}</ThemedText>
+                  </View>
+                  <View style={styles.facturaHeader}>
+                    <ThemedText type="small">Cédula: {factura.cedula}</ThemedText>
+                    <ThemedText type="smallBold" style={{ color: theme.accent }}>{formatMoney(factura.total)}</ThemedText>
+                  </View>
+                  <View style={styles.facturaLineas}>
+                    {factura.lineas.map((linea, idx) => (
+                      <View key={idx} style={styles.lineaResumen}>
+                        <ThemedText type="small" themeColor="textSecondary">
+                          {linea.cantidad}x {linea.codigoLocalidad}
+                        </ThemedText>
+                        <ThemedText type="small" themeColor="textSecondary">
+                          {formatMoney(linea.total)}
+                        </ThemedText>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              ))}
+            </View>
+          </Card>
+        </FadeInView>
+      ) : null}
+
       {reporte.length === 0 && !loading && codigoPartido ? (
         <Card>
           <ThemedText type="small">No hay ventas registradas para este partido.</ThemedText>
@@ -232,6 +272,29 @@ const styles = StyleSheet.create({
   },
   totalRow: {
     marginTop: Spacing.two,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  facturasList: {
+    gap: Spacing.two,
+    marginTop: Spacing.one,
+  },
+  facturaCard: {
+    padding: Spacing.two,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.06)',
+    gap: Spacing.one,
+  },
+  facturaHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  facturaLineas: {
+    marginTop: Spacing.one,
+    gap: Spacing.half,
+  },
+  lineaResumen: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },

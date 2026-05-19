@@ -6,8 +6,11 @@ import { MD3DarkTheme, MD3LightTheme, PaperProvider } from 'react-native-paper';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
 import { Colors } from '@/constants/theme';
+import { AuthProvider, useAuth } from '@/hooks/use-auth';
+import LoginScreen from './login';
+import { Stack } from 'expo-router';
 
-export default function TabLayout() {
+function RootLayoutContent() {
   const colorScheme = useColorScheme();
   const scheme = colorScheme === 'dark' ? 'dark' : 'light';
   const palette = Colors[scheme];
@@ -42,12 +45,22 @@ export default function TabLayout() {
     },
   };
 
+  const { isAuthenticated } = useAuth();
+
   return (
     <PaperProvider theme={paperTheme}>
       <ThemeProvider value={navigationTheme}>
         <AnimatedSplashOverlay />
-        <AppTabs />
+        {isAuthenticated ? <AppTabs /> : <LoginScreen />}
       </ThemeProvider>
     </PaperProvider>
+  );
+}
+
+export default function TabLayout() {
+  return (
+    <AuthProvider>
+      <RootLayoutContent />
+    </AuthProvider>
   );
 }

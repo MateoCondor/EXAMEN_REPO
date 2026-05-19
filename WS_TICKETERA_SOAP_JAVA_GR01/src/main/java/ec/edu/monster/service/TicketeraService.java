@@ -4,6 +4,7 @@ import ec.edu.monster.entity.DetalleFactura;
 import ec.edu.monster.entity.Factura;
 import ec.edu.monster.repository.DetalleFacturaRepository;
 import ec.edu.monster.repository.FacturaRepository;
+import ec.edu.monster.rest.dto.CompraRequest;
 import ec.edu.monster.soapclient.SoapFederacionClient;
 import ec.edu.monster.soapclient.model.LocalidadPartidoDTO;
 import ec.edu.monster.soapclient.model.PartidoFutbolDTO;
@@ -82,6 +83,84 @@ public class TicketeraService {
         return factura;
     }
 
+    public Factura comprarMultiplesLocalidades(CompraRequest request) throws TicketeraBusinessException {
+        String codigoPartido = request.getCodigoPartido();
+        String cedula = request.getCedula();
+        List<CompraRequest.LineaCompra> lineas = request.getLineas();
+
+        validarCodigoPartido(codigoPartido);
+        if (cedula == null || cedula.trim().isEmpty()) {
+            throw new TicketeraBusinessException("Cedula requerida");
+        }
+        if (lineas == null || lineas.isEmpty()) {
+            throw new TicketeraBusinessException("Debe seleccionar al menos una localidad");
+        }
+
+        // Validar todas las localidades primero
+        List<LocalidadPartidoDTO> todasLocalidades = soapClient.obtenerLocalidadesPorPartido(codigoPartido);
+        double subtotal = 0;
+
+        for (CompraRequest.LineaCompra linea : lineas) {
+            if (linea.getCantidad() <= 0) {
+                throw new TicketeraBusinessException("Cantidad debe ser mayor a cero");
+            }
+
+            LocalidadPartidoDTO localidad = null;
+            for (LocalidadPartidoDTO loc : todasLocalidades) {
+                if (linea.getCodigoLocalidad().equalsIgnoreCase(loc.getCodigoLocalidad())) {
+                    localidad = loc;
+                    break;
+                }
+            }
+
+            if (localidad == null) {
+                throw new TicketeraBusinessException("Localidad " + linea.getCodigoLocalidad() + " no existe");
+            }
+            if (localidad.getDisponibilidad() < linea.getCantidad()) {
+                throw new TicketeraBusinessException("Stock insuficiente para " + linea.getCodigoLocalidad());
+            }
+
+            subtotal += linea.getCantidad() * localidad.getPrecio();
+        }
+
+        double iva = subtotal * IVA_RATE;
+        double total = subtotal + iva;
+
+        // Crear factura
+        Factura factura = new Factura();
+        factura.setFecha(new Date());
+        factura.setSubtotal(subtotal);
+        factura.setIva(iva);
+        factura.setTotal(total);
+        factura.setCedula(cedula);
+
+        // Crear detalles y decrementar disponibilidad
+        for (CompraRequest.LineaCompra linea : lineas) {
+            LocalidadPartidoDTO localidad = buscarLocalidad(codigoPartido, linea.getCodigoLocalidad());
+            double precioUnitario = localidad.getPrecio();
+            double totalLinea = linea.getCantidad() * precioUnitario;
+
+            DetalleFactura detalle = new DetalleFactura();
+            detalle.setFactura(factura);
+            detalle.setCodigoPartido(codigoPartido);
+            detalle.setCodigoLocalidad(linea.getCodigoLocalidad());
+            detalle.setCantidad(linea.getCantidad());
+            detalle.setPrecioUnitario(precioUnitario);
+            detalle.setTotal(totalLinea);
+
+            factura.getDetalles().add(detalle);
+
+            // Decrementar disponibilidad
+            boolean ok = soapClient.decrementarDisponibilidad(codigoPartido, linea.getCodigoLocalidad(), linea.getCantidad());
+            if (!ok) {
+                throw new TicketeraBusinessException("No se pudo decrementar disponibilidad para " + linea.getCodigoLocalidad());
+            }
+        }
+
+        facturaRepository.create(factura);
+        return factura;
+    }
+
     public List<ReporteItem> obtenerReporte(String codigoPartido) throws TicketeraBusinessException {
         validarCodigoPartido(codigoPartido);
         List<Object[]> rows = detalleRepository.reportePorPartido(codigoPartido);
@@ -93,6 +172,31 @@ public class TicketeraService {
             items.add(new ReporteItem(codigoLocalidad, cantidadVendida, totalRecaudado));
         }
         return items;
+    }
+
+    public List<ec.edu.monster.rest.dto.FacturaDTO> obtenerFacturasPorPartido(String codigoPartido) throws TicketeraBusinessException {
+        validarCodigoPartido(codigoPartido);
+        List<Factura> facturas = facturaRepository.buscarPorPartido(codigoPartido);
+        List<ec.edu.monster.rest.dto.FacturaDTO> dtos = new ArrayList<>();
+        for (Factura f : facturas) {
+            ec.edu.monster.rest.dto.FacturaDTO dto = new ec.edu.monster.rest.dto.FacturaDTO();
+            dto.setIdFactura(f.getIdFactura());
+            dto.setFecha(f.getFecha());
+            dto.setTotal(f.getTotal());
+            dto.setCedula(f.getCedula());
+            
+            List<ec.edu.monster.rest.dto.FacturaDTO.FacturaLineaDTO> lineas = new ArrayList<>();
+            for (DetalleFactura d : f.getDetalles()) {
+                ec.edu.monster.rest.dto.FacturaDTO.FacturaLineaDTO linea = new ec.edu.monster.rest.dto.FacturaDTO.FacturaLineaDTO();
+                linea.setCodigoLocalidad(d.getCodigoLocalidad());
+                linea.setCantidad(d.getCantidad());
+                linea.setTotal(d.getTotal());
+                lineas.add(linea);
+            }
+            dto.setLineas(lineas);
+            dtos.add(dto);
+        }
+        return dtos;
     }
 
     private void validarCodigoPartido(String codigoPartido) throws TicketeraBusinessException {
