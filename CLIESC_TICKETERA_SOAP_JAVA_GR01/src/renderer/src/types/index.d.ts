@@ -62,5 +62,5 @@ export interface PurchaseResponse {
   subtotal: number
   iva: number
   total: number
-  cedula: number
+  cedula: string
 }
