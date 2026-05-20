@@ -2,7 +2,7 @@ export interface Mapper<DTO, Entity> {
   toEntity: (dto: DTO) => Entity
 }
 
-export interface ApiError {
+export interface ApiErrorResponse {
   mensaje: string
 }
 

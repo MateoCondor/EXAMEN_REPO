@@ -1,7 +1,7 @@
-import { ApiError } from '@renderer/types'
+import { ApiErrorResponse } from '@renderer/types'
 import { isAxiosError } from 'axios'
 
-function isApiError(error: unknown): error is ApiError {
+function isApiError(error: unknown): error is ApiErrorResponse {
   return error != null && typeof error === 'object' && 'mensaje' in error
 }
 
