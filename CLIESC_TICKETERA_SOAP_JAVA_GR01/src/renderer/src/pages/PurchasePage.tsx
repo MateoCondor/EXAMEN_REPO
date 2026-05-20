@@ -8,13 +8,7 @@ import { SoccerGame } from '@renderer/entities/SoccerGame'
 import { useLocationList } from '@renderer/hooks/useLocationList'
 import { usePurchaseMutation } from '@renderer/hooks/usePurchaseMutation'
 import { PurchaseMapper } from '@renderer/mappers/Purchase.mapper'
-import {
-  applyTax,
-  computeTax,
-  excludeTax,
-  formatMoney,
-  LOCALE_TAX
-} from '@renderer/utils/money.api'
+import { applyTax, computeTax, formatMoney, LOCALE_TAX } from '@renderer/utils/money.api'
 import { useEffect, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { FaCheck } from 'react-icons/fa'
@@ -205,11 +199,9 @@ export function PurchasePage() {
 
           <footer>
             <p className="text-muted text-sm">
-              Subtotal: {formatMoney(excludeTax(purchaseCompleted?.total ?? 0))}
+              Subtotal: {formatMoney(purchaseCompleted?.subtotal ?? 0)}
             </p>
-            <p className="text-muted text-sm">
-              IVA: {formatMoney(computeTax(purchaseCompleted?.total ?? 0))}
-            </p>
+            <p className="text-muted text-sm">IVA: {formatMoney(purchaseCompleted?.tax ?? 0)}</p>
             <p className="text-sm font-semibold">
               Total: {formatMoney(purchaseCompleted?.total ?? 0)}
             </p>
