@@ -58,8 +58,13 @@ export default function ReporteScreen() {
     }
   };
 
-  const totalRecaudado = useMemo(
+  const totalRecaudadoSinIva = useMemo(
     () => reporte.reduce((acc, item) => acc + item.totalRecaudado, 0),
+    [reporte]
+  );
+
+  const totalRecaudado = useMemo(
+    () => reporte.reduce((acc, item) => acc + (item.totalRecaudado * 1.15), 0),
     [reporte]
   );
 
@@ -158,7 +163,10 @@ export default function ReporteScreen() {
                     Vendidos
                   </ThemedText>
                   <ThemedText type="smallBold" style={styles.tableCell}>
-                    Total recaudado
+                    Recaudado (sin IVA)
+                  </ThemedText>
+                  <ThemedText type="smallBold" style={styles.tableCell}>
+                    Recaudado (con IVA)
                   </ThemedText>
                 </View>
                 {reporte.map((item) => (
@@ -172,12 +180,19 @@ export default function ReporteScreen() {
                     <ThemedText type="small" style={styles.tableCell}>
                       {formatMoney(item.totalRecaudado)}
                     </ThemedText>
+                    <ThemedText type="small" style={styles.tableCell}>
+                      {formatMoney(item.totalRecaudado * 1.15)}
+                    </ThemedText>
                   </View>
                 ))}
               </View>
             </ScrollView>
             <View style={styles.totalRow}>
-              <ThemedText type="smallBold">Total recaudado:</ThemedText>
+              <ThemedText type="smallBold">Total recaudado (sin IVA):</ThemedText>
+              <ThemedText type="smallBold">{formatMoney(totalRecaudadoSinIva)}</ThemedText>
+            </View>
+            <View style={[styles.totalRow, { marginTop: Spacing.one }]}>
+              <ThemedText type="smallBold">Total recaudado (con IVA):</ThemedText>
               <ThemedText type="smallBold">{formatMoney(totalRecaudado)}</ThemedText>
             </View>
           </Card>
