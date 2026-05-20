@@ -10,7 +10,7 @@ public class LoginView {
 
     public LoginData showLogin() {
         System.out.println("\n========================================");
-        System.out.println("         CLICON RESTFUL - JAVA GR01       ");
+        System.out.println("         CLICON SOAP - JAVA GR01          ");
         System.out.println("            INICIO DE SESIÓN              ");
         System.out.println("\n========================================");
         System.out.println("----------------------------------------");
