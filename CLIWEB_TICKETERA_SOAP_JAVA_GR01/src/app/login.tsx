@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, ScrollView } from 'react-native';
 
 import { Card, FieldLabel, TextField, ActionButton } from '@/components/ticketera-ui';
 import { ThemedText } from '@/components/themed-text';
@@ -11,38 +11,70 @@ import { useRouter } from 'expo-router';
 export default function LoginScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, register } = useAuth();
+  const [isRegister, setIsRegister] = useState(false);
+
+  // Login fields
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  // Register fields
+  const [regUsername, setRegUsername] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regCedula, setRegCedula] = useState('');
+  const [regNombre, setRegNombre] = useState('');
+  const [regApellido, setRegApellido] = useState('');
+  const [regTelefono, setRegTelefono] = useState('');
+  const [regCorreo, setRegCorreo] = useState('');
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     setError(null);
-    setLoading(true);
-
-    // Simulamos un pequeño delay para dar feedback visual
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
     if (!username || !password) {
       setError('Usuario y contraseña son requeridos');
-      setLoading(false);
       return;
     }
-
-    if (login(username, password)) {
-      // Navega a la pantalla principal
-      router.replace('/');
-    } else {
-      setError('Usuario o contraseña incorrectos');
+    setLoading(true);
+    try {
+      await login(username, password);
+      // Removed router.replace('/') because _layout.tsx handles the view switch conditionally.
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
       setPassword('');
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setLoading(false);
+  const handleRegister = async () => {
+    setError(null);
+    if (!regUsername || !regPassword || !regCedula || !regNombre || !regApellido) {
+      setError('Los campos obligatorios son: usuario, contraseña, cédula, nombre y apellido');
+      return;
+    }
+    setLoading(true);
+    try {
+      await register({
+        username: regUsername.trim(),
+        password: regPassword.trim(),
+        cedula: regCedula.trim(),
+        nombre: regNombre.trim(),
+        apellido: regApellido.trim(),
+        telefono: regTelefono.trim() || undefined,
+        correo: regCorreo.trim() || undefined,
+      });
+      // Removed router.replace('/') because _layout.tsx handles the view switch conditionally.
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al registrarse');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.content}>
         <View style={styles.header}>
           <ThemedText type="title">TicketPremium</ThemedText>
@@ -51,55 +83,161 @@ export default function LoginScreen() {
           </ThemedText>
         </View>
 
-        <Card style={styles.formCard}>
-          <ThemedText type="smallBold" style={styles.loginTitle}>
-            Ingresa tus credenciales
-          </ThemedText>
-
-          <FieldLabel>Usuario</FieldLabel>
-          <TextField
-            value={username}
-            onChangeText={setUsername}
-            placeholder="Usuario"
-            editable={!loading}
-            autoCapitalize="characters"
-            autoCorrect={false}
-          />
-
-          <FieldLabel>Contraseña</FieldLabel>
-          <TextField
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Contraseña"
-            secureTextEntry
-            editable={!loading}
-            autoCorrect={false}
-          />
-
-          {error ? (
-            <Card style={styles.errorCard}>
-              <ThemedText type="small" style={{ color: '#d32f2f' }}>
-                {error}
-              </ThemedText>
-            </Card>
-          ) : null}
-
-          <View style={styles.buttonContainer}>
-            <ActionButton
-              label={loading ? 'Verificando...' : 'Ingresar'}
-              onPress={handleLogin}
-              disabled={loading}
-            />
-          </View>
-
-          <View style={styles.credentialsHint}>
-            <ThemedText type="small" themeColor="textSecondary">
-              Credenciales de prueba:
+        {!isRegister ? (
+          <Card style={styles.formCard}>
+            <ThemedText type="smallBold" style={styles.loginTitle}>
+              Iniciar Sesión
             </ThemedText>
-            <ThemedText type="small">Usuario: MONSTER</ThemedText>
-            <ThemedText type="small">Contraseña: MONSTER9</ThemedText>
-          </View>
-        </Card>
+
+            <FieldLabel>Usuario</FieldLabel>
+            <TextField
+              value={username}
+              onChangeText={setUsername}
+              placeholder="Usuario"
+              editable={!loading}
+              autoCapitalize="characters"
+              autoCorrect={false}
+            />
+
+            <FieldLabel>Contraseña</FieldLabel>
+            <TextField
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Contraseña"
+              secureTextEntry
+              editable={!loading}
+              autoCorrect={false}
+            />
+
+            {error ? (
+              <Card style={styles.errorCard}>
+                <ThemedText type="small" style={{ color: '#d32f2f' }}>
+                  {error}
+                </ThemedText>
+              </Card>
+            ) : null}
+
+            <View style={styles.buttonContainer}>
+              <ActionButton
+                label={loading ? 'Verificando...' : 'Ingresar'}
+                onPress={handleLogin}
+                disabled={loading}
+              />
+            </View>
+
+            <View style={styles.switchRow}>
+              <ThemedText type="small" themeColor="textSecondary">
+                ¿No tienes cuenta?
+              </ThemedText>
+              <ActionButton
+                label="Registrarse"
+                variant="ghost"
+                onPress={() => { setIsRegister(true); setError(null); }}
+              />
+            </View>
+
+            <View style={styles.credentialsHint}>
+              <ThemedText type="small" themeColor="textSecondary">
+                Admin: MONSTER / MONSTER9
+              </ThemedText>
+            </View>
+          </Card>
+        ) : (
+          <Card style={styles.formCard}>
+            <ThemedText type="smallBold" style={styles.loginTitle}>
+              Registro de Cliente
+            </ThemedText>
+
+            <FieldLabel>Usuario *</FieldLabel>
+            <TextField
+              value={regUsername}
+              onChangeText={setRegUsername}
+              placeholder="Nombre de usuario"
+              editable={!loading}
+              autoCorrect={false}
+            />
+
+            <FieldLabel>Contraseña *</FieldLabel>
+            <TextField
+              value={regPassword}
+              onChangeText={setRegPassword}
+              placeholder="Contraseña"
+              secureTextEntry
+              editable={!loading}
+              autoCorrect={false}
+            />
+
+            <FieldLabel>Cédula *</FieldLabel>
+            <TextField
+              value={regCedula}
+              onChangeText={setRegCedula}
+              placeholder="Ej: 1234567890"
+              editable={!loading}
+              keyboardType="numeric"
+            />
+
+            <FieldLabel>Nombre *</FieldLabel>
+            <TextField
+              value={regNombre}
+              onChangeText={setRegNombre}
+              placeholder="Nombre"
+              editable={!loading}
+            />
+
+            <FieldLabel>Apellido *</FieldLabel>
+            <TextField
+              value={regApellido}
+              onChangeText={setRegApellido}
+              placeholder="Apellido"
+              editable={!loading}
+            />
+
+            <FieldLabel>Teléfono</FieldLabel>
+            <TextField
+              value={regTelefono}
+              onChangeText={setRegTelefono}
+              placeholder="Teléfono (opcional)"
+              editable={!loading}
+              keyboardType="phone-pad"
+            />
+
+            <FieldLabel>Correo</FieldLabel>
+            <TextField
+              value={regCorreo}
+              onChangeText={setRegCorreo}
+              placeholder="correo@ejemplo.com (opcional)"
+              editable={!loading}
+              keyboardType="email-address"
+            />
+
+            {error ? (
+              <Card style={styles.errorCard}>
+                <ThemedText type="small" style={{ color: '#d32f2f' }}>
+                  {error}
+                </ThemedText>
+              </Card>
+            ) : null}
+
+            <View style={styles.buttonContainer}>
+              <ActionButton
+                label={loading ? 'Registrando...' : 'Registrarse'}
+                onPress={handleRegister}
+                disabled={loading}
+              />
+            </View>
+
+            <View style={styles.switchRow}>
+              <ThemedText type="small" themeColor="textSecondary">
+                ¿Ya tienes cuenta?
+              </ThemedText>
+              <ActionButton
+                label="Iniciar Sesión"
+                variant="ghost"
+                onPress={() => { setIsRegister(false); setError(null); }}
+              />
+            </View>
+          </Card>
+        )}
       </View>
 
       {loading ? (
@@ -107,20 +245,21 @@ export default function LoginScreen() {
           <ActivityIndicator size="large" color={theme.accent} />
         </View>
       ) : null}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.four,
   },
   content: {
     gap: Spacing.four,
     width: '100%',
-    maxWidth: 400,
+    maxWidth: 420,
     alignSelf: 'center',
   },
   header: {
@@ -142,11 +281,19 @@ const styles = StyleSheet.create({
   buttonContainer: {
     marginTop: Spacing.one,
   },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.two,
+    marginTop: Spacing.one,
+  },
   credentialsHint: {
     backgroundColor: 'rgba(128, 128, 128, 0.1)',
     borderRadius: 8,
     padding: Spacing.two,
     gap: Spacing.half,
+    alignItems: 'center',
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,

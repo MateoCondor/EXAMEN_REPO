@@ -22,4 +22,12 @@ public class FacturaRepository {
                 .setParameter("codigoPartido", codigoPartido)
                 .getResultList();
     }
+
+    public java.util.List<Factura> buscarPorCliente(String cedula) {
+        return entityManager.createQuery(
+                "SELECT DISTINCT f FROM Factura f LEFT JOIN FETCH f.detalles WHERE f.cedula = :cedula ORDER BY f.fecha DESC", 
+                Factura.class)
+                .setParameter("cedula", cedula)
+                .getResultList();
+    }
 }

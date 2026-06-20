@@ -30,9 +30,11 @@ public class CompraResource {
             response.setIdFactura(factura.getIdFactura());
             response.setFecha(factura.getFecha());
             response.setSubtotal(factura.getSubtotal());
+            response.setDescuento(factura.getDescuento());
             response.setIva(factura.getIva());
             response.setTotal(factura.getTotal());
             response.setCedula(factura.getCedula());
+            response.setFormaPago(factura.getFormaPago());
 
             return Response.ok(response).build();
         } catch (TicketeraBusinessException ex) {

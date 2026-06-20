@@ -17,10 +17,29 @@ public class PartidoFutbolRepository {
         return entityManager.find(PartidoFutbol.class, codigo);
     }
 
+    public List<PartidoFutbol> findAll() {
+        return entityManager
+                .createQuery("SELECT p FROM PartidoFutbol p ORDER BY p.fecha", PartidoFutbol.class)
+                .getResultList();
+    }
+
     public List<PartidoFutbol> findDisponibles(Date now) {
         return entityManager
-                .createQuery("SELECT p FROM PartidoFutbol p WHERE p.fecha >= :now ORDER BY p.fecha", PartidoFutbol.class)
+                .createQuery("SELECT p FROM PartidoFutbol p WHERE p.fecha IS NOT NULL AND p.fecha >= :now ORDER BY p.fecha", PartidoFutbol.class)
                 .setParameter("now", now)
                 .getResultList();
+    }
+
+    public PartidoFutbol create(PartidoFutbol partido) {
+        entityManager.persist(partido);
+        return partido;
+    }
+
+    public PartidoFutbol update(PartidoFutbol partido) {
+        return entityManager.merge(partido);
+    }
+
+    public void delete(PartidoFutbol partido) {
+        entityManager.remove(entityManager.contains(partido) ? partido : entityManager.merge(partido));
     }
 }

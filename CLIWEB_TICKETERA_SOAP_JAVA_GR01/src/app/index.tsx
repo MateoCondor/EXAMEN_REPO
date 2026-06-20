@@ -9,8 +9,16 @@ import { Spacing } from '@/constants/theme';
 import { formatDate } from '@/lib/format';
 import { getPartidos, Partido } from '@/lib/ticketera-api';
 import { useTheme } from '@/hooks/use-theme';
+import { useAuth } from '@/hooks/use-auth';
+import PartidosAdminScreen from './partidos-admin';
 
 export default function PartidosScreen() {
+  const { user } = useAuth();
+  
+  if (user?.rol === 'admin') {
+    return <PartidosAdminScreen />;
+  }
+
   const theme = useTheme();
   const [partidos, setPartidos] = useState<Partido[]>([]);
   const [loading, setLoading] = useState(false);

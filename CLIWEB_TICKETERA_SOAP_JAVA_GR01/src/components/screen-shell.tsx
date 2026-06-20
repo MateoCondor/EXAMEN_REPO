@@ -23,10 +23,10 @@ export function ScreenShell({ title, subtitle, actions, children }: ScreenShellP
 
   return (
     <ThemedView style={styles.page}>
-      <View pointerEvents="none" style={[styles.orb, styles.orbOne]} />
-      <View pointerEvents="none" style={[styles.orb, styles.orbTwo]} />
-      <View pointerEvents="none" style={[styles.track, styles.trackOne]} />
-      <View pointerEvents="none" style={[styles.track, styles.trackTwo]} />
+      <View style={[styles.orb, styles.orbOne]} />
+      <View style={[styles.orb, styles.orbTwo]} />
+      <View style={[styles.track, styles.trackOne]} />
+      <View style={[styles.track, styles.trackTwo]} />
 
       <ScrollView
         contentContainerStyle={[
@@ -109,6 +109,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     borderRadius: 999,
     opacity: 0.7,
+    pointerEvents: 'none',
   },
   orbOne: {
     width: 420,
@@ -129,6 +130,7 @@ const styles = StyleSheet.create({
     height: 2,
     width: '140%',
     opacity: 0.3,
+    pointerEvents: 'none',
   },
   trackOne: {
     backgroundColor: 'rgba(30, 136, 229, 0.35)',

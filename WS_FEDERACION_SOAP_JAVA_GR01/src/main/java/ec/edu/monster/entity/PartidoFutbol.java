@@ -3,8 +3,10 @@ package ec.edu.monster.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -13,9 +15,7 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Table(name = "partido_futbol")
@@ -36,15 +36,16 @@ public class PartidoFutbol implements Serializable {
     private String equipoVisita;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Date fecha;
 
     @Column(length = 120)
     private String lugar;
 
-    @OneToMany(mappedBy = "partido", cascade = CascadeType.ALL)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "estadio_codigo", nullable = false)
     @XmlTransient
-    private List<LocalidadPartido> localidades = new ArrayList<>();
+    private Estadio estadio;
 
     public PartidoFutbol() {
     }
@@ -89,11 +90,11 @@ public class PartidoFutbol implements Serializable {
         this.lugar = lugar;
     }
 
-    public List<LocalidadPartido> getLocalidades() {
-        return localidades;
+    public Estadio getEstadio() {
+        return estadio;
     }
 
-    public void setLocalidades(List<LocalidadPartido> localidades) {
-        this.localidades = localidades;
+    public void setEstadio(Estadio estadio) {
+        this.estadio = estadio;
     }
 }

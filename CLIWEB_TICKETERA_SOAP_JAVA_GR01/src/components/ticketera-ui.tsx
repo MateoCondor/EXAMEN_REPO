@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, TextInput, View, type TextInputProps, type ViewProps } from 'react-native';
+import { Platform, Pressable, StyleSheet, TextInput, View, type TextInputProps, type ViewProps } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -30,11 +30,18 @@ export function ActionButton({ label, onPress, variant = 'primary', disabled }: 
           backgroundColor,
           borderColor,
           opacity: pressed ? 0.85 : 1,
-          shadowColor: theme.accent,
-          shadowOpacity: variant === 'primary' ? 0.25 : 0.08,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 6 },
-          elevation: variant === 'primary' ? 4 : 1,
+          ...Platform.select({
+            web: {
+              boxShadow: variant === 'primary' ? `0px 6px 12px ${theme.accent}40` : `0px 6px 12px ${theme.accent}14`,
+            },
+            default: {
+              shadowColor: theme.accent,
+              shadowOpacity: variant === 'primary' ? 0.25 : 0.08,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 6 },
+              elevation: variant === 'primary' ? 4 : 1,
+            },
+          }),
         },
         disabled && styles.buttonDisabled,
       ]}>
@@ -54,7 +61,14 @@ export function Card({ children, style, ...rest }: ViewProps) {
         styles.card,
         {
           borderColor: theme.stroke,
-          shadowColor: theme.accent,
+          ...Platform.select({
+            web: {
+              boxShadow: `0px 8px 16px ${theme.accent}1A`,
+            },
+            default: {
+              shadowColor: theme.accent,
+            },
+          }),
         },
         style,
       ]}
@@ -164,10 +178,14 @@ const styles = StyleSheet.create({
     padding: Spacing.three,
     gap: Spacing.two,
     borderWidth: 1,
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 2,
+    ...Platform.select({
+      default: {
+        shadowOpacity: 0.1,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 8 },
+        elevation: 2,
+      },
+    }),
   },
   label: {
     letterSpacing: 0.3,

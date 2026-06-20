@@ -1,40 +1,53 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { loginUser, registrarCliente, LoginResponse, RegistroRequest } from '@/lib/ticketera-api';
+
+export type UserInfo = {
+  username: string;
+  rol: 'admin' | 'cliente';
+  cedula: string | null;
+};
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (username: string, password: string) => boolean;
+  user: UserInfo | null;
+  login: (username: string, password: string) => Promise<UserInfo>;
+  register: (data: RegistroRequest) => Promise<UserInfo>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const VALID_USERNAME = 'MONSTER';
-const VALID_PASSWORD = 'MONSTER9';
-
 export function AuthProvider({ children }: { children: ReactNode }): ReactNode {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<UserInfo | null>(null);
 
-  useEffect(() => {
-    // Aquí podrías verificar si hay sesión almacenada
-    // Por ahora, comenzamos sin autenticación
-  }, []);
+  const login = async (username: string, password: string): Promise<UserInfo> => {
+    const response: LoginResponse = await loginUser({ username: username.trim(), password: password.trim() });
+    const userInfo: UserInfo = {
+      username: response.username,
+      rol: response.rol as 'admin' | 'cliente',
+      cedula: response.cedula,
+    };
+    setUser(userInfo);
+    return userInfo;
+  };
 
-  const login = (username: string, password: string): boolean => {
-    const cleanUser = username?.trim().toUpperCase();
-    const cleanPass = password?.trim();
-    if (cleanUser === VALID_USERNAME && cleanPass === VALID_PASSWORD) {
-      setIsAuthenticated(true);
-      return true;
-    }
-    return false;
+  const register = async (data: RegistroRequest): Promise<UserInfo> => {
+    const response: LoginResponse = await registrarCliente(data);
+    const userInfo: UserInfo = {
+      username: response.username,
+      rol: response.rol as 'admin' | 'cliente',
+      cedula: response.cedula,
+    };
+    setUser(userInfo);
+    return userInfo;
   };
 
   const logout = () => {
-    setIsAuthenticated(false);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated: user !== null, user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

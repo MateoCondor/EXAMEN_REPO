@@ -40,4 +40,16 @@ public class ReporteResource {
                     .build();
         }
     }
+
+    @GET
+    @Path("cliente/{cedula}")
+    public Response obtenerFacturasCliente(@PathParam("cedula") String cedula) {
+        try {
+            return Response.ok(ticketeraService.obtenerFacturasPorCliente(cedula)).build();
+        } catch (TicketeraBusinessException ex) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new RestError(ex.getMessage()))
+                    .build();
+        }
+    }
 }

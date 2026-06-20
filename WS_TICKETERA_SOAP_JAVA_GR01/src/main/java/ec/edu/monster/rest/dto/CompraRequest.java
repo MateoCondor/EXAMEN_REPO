@@ -4,19 +4,12 @@ import java.util.List;
 
 public class CompraRequest {
 
-    private String codigoPartido;
     private String cedula;
+    private String formaPago;
+    private Integer plazo;
     private List<LineaCompra> lineas;
 
     public CompraRequest() {
-    }
-
-    public String getCodigoPartido() {
-        return codigoPartido;
-    }
-
-    public void setCodigoPartido(String codigoPartido) {
-        this.codigoPartido = codigoPartido;
     }
 
     public String getCedula() {
@@ -25,6 +18,22 @@ public class CompraRequest {
 
     public void setCedula(String cedula) {
         this.cedula = cedula;
+    }
+
+    public String getFormaPago() {
+        return formaPago;
+    }
+
+    public void setFormaPago(String formaPago) {
+        this.formaPago = formaPago;
+    }
+
+    public Integer getPlazo() {
+        return plazo;
+    }
+
+    public void setPlazo(Integer plazo) {
+        this.plazo = plazo;
     }
 
     public List<LineaCompra> getLineas() {
@@ -36,10 +45,19 @@ public class CompraRequest {
     }
 
     public static class LineaCompra {
+        private String codigoPartido;
         private String codigoLocalidad;
-        private int cantidad;
+        private List<AsientoCompra> asientos;
 
         public LineaCompra() {
+        }
+
+        public String getCodigoPartido() {
+            return codigoPartido;
+        }
+
+        public void setCodigoPartido(String codigoPartido) {
+            this.codigoPartido = codigoPartido;
         }
 
         public String getCodigoLocalidad() {
@@ -50,12 +68,44 @@ public class CompraRequest {
             this.codigoLocalidad = codigoLocalidad;
         }
 
-        public int getCantidad() {
-            return cantidad;
+        public List<AsientoCompra> getAsientos() {
+            return asientos;
         }
 
-        public void setCantidad(int cantidad) {
-            this.cantidad = cantidad;
+        public void setAsientos(List<AsientoCompra> asientos) {
+            this.asientos = asientos;
+        }
+
+        public static class AsientoCompra {
+            private String seccion;
+            private String numeroAsiento;
+            private String nombreAsistente;
+
+            public AsientoCompra() {}
+
+            public String getSeccion() {
+                return seccion;
+            }
+
+            public void setSeccion(String seccion) {
+                this.seccion = seccion;
+            }
+
+            public String getNumeroAsiento() {
+                return numeroAsiento;
+            }
+
+            public void setNumeroAsiento(String numeroAsiento) {
+                this.numeroAsiento = numeroAsiento;
+            }
+
+            public String getNombreAsistente() {
+                return nombreAsistente;
+            }
+
+            public void setNombreAsistente(String nombreAsistente) {
+                this.nombreAsistente = nombreAsistente;
+            }
         }
     }
 }

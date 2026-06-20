@@ -8,7 +8,6 @@ import AppTabs from '@/components/app-tabs';
 import { Colors } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import LoginScreen from './login';
-import { Stack } from 'expo-router';
 
 function RootLayoutContent() {
   const colorScheme = useColorScheme();

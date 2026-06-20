@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { FadeInView } from '@/components/fade-in';
 import { ScreenShell } from '@/components/screen-shell';
@@ -9,6 +9,7 @@ import { Spacing } from '@/constants/theme';
 import { formatDate, formatMoney, formatNumber } from '@/lib/format';
 import { getPartidos, getReporte, getFacturasPorPartido, Partido, ReporteItem, Factura } from '@/lib/ticketera-api';
 import { useTheme } from '@/hooks/use-theme';
+import { SeatMap } from '@/components/ticketera-ui/seat-map';
 
 export default function ReporteScreen() {
   const theme = useTheme();
@@ -19,6 +20,13 @@ export default function ReporteScreen() {
   const [loading, setLoading] = useState(false);
   const [loadingPartidos, setLoadingPartidos] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // SeatMap modal state
+  const [viewSeatsData, setViewSeatsData] = useState<{
+    codigoPartido: string;
+    codigoLocalidad: string;
+    facturaId: number;
+  } | null>(null);
 
   const selectedPartido = useMemo(
     () => partidos.find((partido) => partido.codigo === codigoPartido),
@@ -135,6 +143,21 @@ export default function ReporteScreen() {
         </FadeInView>
       ) : null}
 
+      {/* Ver Asientos Modal */}
+      {viewSeatsData && (
+        <SeatMap 
+          visible={!!viewSeatsData}
+          codigoPartido={viewSeatsData.codigoPartido}
+          codigoLocalidad={viewSeatsData.codigoLocalidad}
+          capacidad={10000} // Valor alto de fallback para permitir ver todas las páginas en modo lectura
+          initialSelectedSeats={[]}
+          onClose={() => setViewSeatsData(null)}
+          highlightFacturaId={viewSeatsData.facturaId}
+          readOnly={true}
+          isAdmin={true} // Por defecto en el reporte lo ve un admin
+        />
+      )}
+
       {error ? (
         <Card style={styles.errorCard}>
           <ThemedText type="smallBold">Error</ThemedText>
@@ -216,13 +239,28 @@ export default function ReporteScreen() {
                   </View>
                   <View style={styles.facturaLineas}>
                     {factura.lineas.map((linea, idx) => (
-                      <View key={idx} style={styles.lineaResumen}>
-                        <ThemedText type="small" themeColor="textSecondary">
-                          {linea.cantidad}x {linea.codigoLocalidad}
-                        </ThemedText>
-                        <ThemedText type="small" themeColor="textSecondary">
-                          {formatMoney(linea.total)}
-                        </ThemedText>
+                      <View key={idx} style={styles.lineaResumenContainer}>
+                        <View style={styles.lineaResumen}>
+                          <ThemedText type="small" themeColor="textSecondary">
+                            {linea.cantidad}x {linea.codigoLocalidad}
+                          </ThemedText>
+                          <ThemedText type="small" themeColor="textSecondary">
+                            {formatMoney(linea.total)}
+                          </ThemedText>
+                        </View>
+                        {linea.codigoPartido && (
+                          <Pressable
+                            onPress={() => setViewSeatsData({
+                              codigoPartido: linea.codigoPartido,
+                              codigoLocalidad: linea.codigoLocalidad,
+                              facturaId: factura.idFactura
+                            })}
+                            style={{ alignSelf: 'flex-start', marginTop: 4 }}>
+                            <ThemedText type="smallBold" style={{ color: theme.accent, fontSize: 11 }}>
+                              🔍 Ver asientos en el mapa
+                            </ThemedText>
+                          </Pressable>
+                        )}
                       </View>
                     ))}
                   </View>
@@ -307,7 +345,13 @@ const styles = StyleSheet.create({
   },
   facturaLineas: {
     marginTop: Spacing.one,
-    gap: Spacing.half,
+    gap: Spacing.one,
+  },
+  lineaResumenContainer: {
+    gap: 2,
+    paddingBottom: Spacing.half,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
   },
   lineaResumen: {
     flexDirection: 'row',

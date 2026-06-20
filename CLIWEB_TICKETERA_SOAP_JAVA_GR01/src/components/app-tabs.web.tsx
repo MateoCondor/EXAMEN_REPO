@@ -14,10 +14,13 @@ import { ThemedView } from './themed-view';
 
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function AppTabs() {
   const { width } = useWindowDimensions();
+  const { user } = useAuth();
   const isCompact = width < 860;
+  const isAdmin = user?.rol === 'admin';
 
   return (
     <Tabs>
@@ -29,18 +32,43 @@ export default function AppTabs() {
       />
       <TabList asChild>
         <CustomTabList isCompact={isCompact}>
-          <TabTrigger name="index" href="/" asChild>
-            <TabButton>Partidos</TabButton>
-          </TabTrigger>
-          <TabTrigger name="localidades" href="/localidades" asChild>
-            <TabButton>Localidades</TabButton>
-          </TabTrigger>
-          <TabTrigger name="comprar" href="/comprar" asChild>
-            <TabButton>Comprar</TabButton>
-          </TabTrigger>
-          <TabTrigger name="reporte" href="/reporte" asChild>
-            <TabButton>Reporte</TabButton>
-          </TabTrigger>
+          {isAdmin ? (
+            <>
+              <TabTrigger name="index" href="/" asChild>
+                <TabButton>⚽ Partidos</TabButton>
+              </TabTrigger>
+              <TabTrigger name="estadios" href={'/estadios' as any} asChild>
+                <TabButton>🏟️ Estadios</TabButton>
+              </TabTrigger>
+              <TabTrigger name="clientes" href={'/clientes' as any} asChild>
+                <TabButton>👥 Clientes</TabButton>
+              </TabTrigger>
+              <TabTrigger name="localidades-estadio" href={'/localidades-estadio' as any} asChild>
+                <TabButton>📍 Localidades</TabButton>
+              </TabTrigger>
+              <TabTrigger name="fechas-partidos" href={'/fechas-partidos' as any} asChild>
+                <TabButton>📅 Fechas</TabButton>
+              </TabTrigger>
+              <TabTrigger name="reporte" href="/reporte" asChild>
+                <TabButton>📊 Reporte</TabButton>
+              </TabTrigger>
+            </>
+          ) : (
+            <>
+              <TabTrigger name="index" href="/" asChild>
+                <TabButton>⚽ Partidos</TabButton>
+              </TabTrigger>
+              <TabTrigger name="localidades" href="/localidades" asChild>
+                <TabButton>📍 Localidades</TabButton>
+              </TabTrigger>
+              <TabTrigger name="comprar" href="/comprar" asChild>
+                <TabButton>🛒 Comprar</TabButton>
+              </TabTrigger>
+              <TabTrigger name="mis-compras" href={'/mis-compras' as any} asChild>
+                <TabButton>📋 Mis Compras</TabButton>
+              </TabTrigger>
+            </>
+          )}
         </CustomTabList>
       </TabList>
     </Tabs>
@@ -67,6 +95,7 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
 export function CustomTabList(props: TabListProps & { isCompact: boolean }) {
   const { isCompact } = props;
   const theme = useTheme();
+  const { user } = useAuth();
 
   return (
     <View
@@ -90,7 +119,7 @@ export function CustomTabList(props: TabListProps & { isCompact: boolean }) {
           <View style={styles.brandBlock}>
             <ThemedText type="smallBold">TicketPremium</ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              Ventas y reportes
+              {user?.rol === 'admin' ? 'Panel de Administración' : `Cliente: ${user?.username ?? ''}`}
             </ThemedText>
           </View>
         ) : null}

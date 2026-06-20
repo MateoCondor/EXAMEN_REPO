@@ -1,5 +1,6 @@
 package ec.edu.monster.entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -31,15 +32,19 @@ public class LocalidadPartido implements Serializable {
     private String codigoLocalidad;
 
     @Column(nullable = false)
+    private int capacidad;
+
+    @Column(nullable = false)
     private int disponibilidad;
 
     @Column(nullable = false)
     private double precio;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "partido_codigo", nullable = false)
+    @JoinColumn(name = "estadio_codigo", nullable = false)
+    @JsonbTransient
     @XmlTransient
-    private PartidoFutbol partido;
+    private Estadio estadio;
 
     public LocalidadPartido() {
     }
@@ -60,6 +65,14 @@ public class LocalidadPartido implements Serializable {
         this.codigoLocalidad = codigoLocalidad;
     }
 
+    public int getCapacidad() {
+        return capacidad;
+    }
+
+    public void setCapacidad(int capacidad) {
+        this.capacidad = capacidad;
+    }
+
     public int getDisponibilidad() {
         return disponibilidad;
     }
@@ -76,11 +89,11 @@ public class LocalidadPartido implements Serializable {
         this.precio = precio;
     }
 
-    public PartidoFutbol getPartido() {
-        return partido;
+    public Estadio getEstadio() {
+        return estadio;
     }
 
-    public void setPartido(PartidoFutbol partido) {
-        this.partido = partido;
+    public void setEstadio(Estadio estadio) {
+        this.estadio = estadio;
     }
 }

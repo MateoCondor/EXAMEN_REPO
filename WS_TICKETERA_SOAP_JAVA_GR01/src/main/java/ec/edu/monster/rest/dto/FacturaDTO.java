@@ -8,6 +8,8 @@ public class FacturaDTO {
     private Date fecha;
     private double total;
     private String cedula;
+    private String formaPago;
+    private double descuento;
     private List<FacturaLineaDTO> lineas;
 
     public FacturaDTO() {}
@@ -24,15 +26,25 @@ public class FacturaDTO {
     public String getCedula() { return cedula; }
     public void setCedula(String cedula) { this.cedula = cedula; }
 
+    public String getFormaPago() { return formaPago; }
+    public void setFormaPago(String formaPago) { this.formaPago = formaPago; }
+
+    public double getDescuento() { return descuento; }
+    public void setDescuento(double descuento) { this.descuento = descuento; }
+
     public List<FacturaLineaDTO> getLineas() { return lineas; }
     public void setLineas(List<FacturaLineaDTO> lineas) { this.lineas = lineas; }
 
     public static class FacturaLineaDTO {
+        private String codigoPartido;
         private String codigoLocalidad;
         private int cantidad;
         private double total;
 
         public FacturaLineaDTO() {}
+
+        public String getCodigoPartido() { return codigoPartido; }
+        public void setCodigoPartido(String codigoPartido) { this.codigoPartido = codigoPartido; }
 
         public String getCodigoLocalidad() { return codigoLocalidad; }
         public void setCodigoLocalidad(String codigoLocalidad) { this.codigoLocalidad = codigoLocalidad; }

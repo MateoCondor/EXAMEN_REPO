@@ -7,9 +7,11 @@ public class CompraResponse {
     private Long idFactura;
     private Date fecha;
     private double subtotal;
+    private double descuento;
     private double iva;
     private double total;
     private String cedula;
+    private String formaPago;
 
     public CompraResponse() {
     }
@@ -60,5 +62,21 @@ public class CompraResponse {
 
     public void setCedula(String cedula) {
         this.cedula = cedula;
+    }
+
+    public double getDescuento() {
+        return descuento;
+    }
+
+    public void setDescuento(double descuento) {
+        this.descuento = descuento;
+    }
+
+    public String getFormaPago() {
+        return formaPago;
+    }
+
+    public void setFormaPago(String formaPago) {
+        this.formaPago = formaPago;
     }
 }

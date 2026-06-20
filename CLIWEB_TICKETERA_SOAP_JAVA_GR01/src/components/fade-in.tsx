@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { Animated, type ViewProps } from 'react-native';
+import { Animated, Platform, type ViewProps } from 'react-native';
 
 type FadeInViewProps = ViewProps & {
   delay?: number;
@@ -16,13 +16,13 @@ export function FadeInView({ delay = 0, duration = 380, style, children, ...rest
         toValue: 1,
         duration,
         delay,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
       Animated.timing(translateY, {
         toValue: 0,
         duration,
         delay,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
     ]).start();
   }, [delay, duration, opacity, translateY]);

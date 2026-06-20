@@ -48,6 +48,12 @@ public class Factura implements Serializable {
     @Column(name = "cedula", length = 20)
     private String cedula;
 
+    @Column(name = "forma_pago", length = 50)
+    private String formaPago;
+
+    @Column(nullable = false)
+    private double descuento;
+
     @OneToMany(mappedBy = "factura", cascade = CascadeType.ALL)
     @JsonbTransient
     private List<DetalleFactura> detalles = new ArrayList<>();
@@ -109,5 +115,21 @@ public class Factura implements Serializable {
 
     public void setCedula(String cedula) {
         this.cedula = cedula;
+    }
+
+    public String getFormaPago() {
+        return formaPago;
+    }
+
+    public void setFormaPago(String formaPago) {
+        this.formaPago = formaPago;
+    }
+
+    public double getDescuento() {
+        return descuento;
+    }
+
+    public void setDescuento(double descuento) {
+        this.descuento = descuento;
     }
 }
