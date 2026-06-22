@@ -58,12 +58,12 @@ type RestError = {
 
 const DEFAULT_API_BASE_URL =
   Platform.OS === 'android'
-    ? 'http://192.168.137.5:8080/WS_TICKETERA_SOAP_JAVA_GR01/api'
+    ? 'http://10.40.89.197:8080/WS_TICKETERA_SOAP_JAVA_GR01/api'
     : 'http://localhost:8080/WS_TICKETERA_SOAP_JAVA_GR01/api';
 
 const COREBANCARIO_BASE_URL =
   Platform.OS === 'android'
-    ? 'http://192.168.137.5:8080/WS_COREBANCARIO_SOAP_JAVA_GR01/resources'
+    ? 'http://10.40.89.197:8080/WS_COREBANCARIO_SOAP_JAVA_GR01/resources'
     : 'http://localhost:8080/WS_COREBANCARIO_SOAP_JAVA_GR01/resources';
 
 function getApiBaseUrl() {

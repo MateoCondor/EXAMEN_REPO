@@ -47,7 +47,7 @@ public class ApiClient {
                 .create();
 
         api = new Retrofit.Builder()
-                .baseUrl("http://localhost:8080/WS_TICKETERA_SOAP_JAVA_GR01/api/")
+                .baseUrl("http://10.40.89.197:8080/WS_TICKETERA_SOAP_JAVA_GR01/api/")
                 .client(httpClient)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();

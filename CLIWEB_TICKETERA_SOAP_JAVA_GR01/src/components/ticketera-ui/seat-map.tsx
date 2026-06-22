@@ -17,6 +17,8 @@ interface SeatMapProps {
   isAdmin?: boolean;
   highlightFacturaId?: number;
   readOnly?: boolean;
+  /** Índice de sección a mostrar al abrir (viene del mapa del estadio) */
+  initialSectionIndex?: number;
 }
 
 const SEATS_PER_SECTION = 100;
@@ -33,6 +35,7 @@ export function SeatMap({
   isAdmin,
   highlightFacturaId,
   readOnly,
+  initialSectionIndex,
 }: SeatMapProps) {
   const theme = useTheme();
   const { width } = useWindowDimensions();
@@ -54,7 +57,8 @@ export function SeatMap({
     if (visible && codigoPartido && codigoLocalidad) {
       loadOcupados();
       setSelectedSeats([...initialSelectedSeats]);
-      setCurrentSectionIndex(0);
+      // Si viene del mapa del estadio, abrir en la sección elegida
+      setCurrentSectionIndex(initialSectionIndex ?? 0);
     }
   }, [visible, codigoPartido, codigoLocalidad]);
 
@@ -128,9 +132,9 @@ export function SeatMap({
         const ocupado = ocupados.find(o => o.seccion === currentSectionName && o.numeroAsiento === numeroAsientoStr);
         const selected = selectedSeats.find(s => s.seccion === currentSectionName && s.numeroAsiento === numeroAsientoStr);
         
-        let bgColor = theme.backgroundElement; // Libre
-        let borderColor = theme.stroke;
-        let textColor = theme.text;
+        let bgColor: string = theme.backgroundElement; // Libre
+        let borderColor: string = theme.stroke;
+        let textColor: string = theme.text;
         
         if (ocupado) {
           if (highlightFacturaId && ocupado.facturaId === highlightFacturaId) {

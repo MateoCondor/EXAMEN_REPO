@@ -21,6 +21,7 @@ import {
 import { useTheme } from '@/hooks/use-theme';
 import { useAuth } from '@/hooks/use-auth';
 import { SeatMap } from '@/components/ticketera-ui/seat-map';
+import { StadiumMap } from '@/components/ticketera-ui/stadium-map';
 
 // Definición para elementos en el carrito
 interface CartItem {
@@ -60,6 +61,7 @@ export default function ComprarScreen() {
 
   // Estado del SeatMap
   const [seatMapLoc, setSeatMapLoc] = useState<typeof localidadesSeleccion[0] | null>(null);
+  const [seatMapInitialSection, setSeatMapInitialSection] = useState(0);
 
   // Estado del Carrito
   const [carrito, setCarrito] = useState<CartItem[]>([]);
@@ -277,8 +279,9 @@ export default function ComprarScreen() {
           visible={!!seatMapLoc}
           codigoPartido={selectedPartido.codigo}
           codigoLocalidad={seatMapLoc.codigoLocalidad}
-          capacidad={seatMapLoc.capacidad || 1000} // Default if missing
+          capacidad={seatMapLoc.capacidad || 1000}
           initialSelectedSeats={seatMapLoc.asientos}
+          initialSectionIndex={seatMapInitialSection}
           onClose={() => setSeatMapLoc(null)}
           onSave={(asientos) => handleSaveSeats(seatMapLoc, asientos)}
           isAdmin={user?.rol === 'admin'}
@@ -421,69 +424,24 @@ export default function ComprarScreen() {
 
         {selectedPartido && (
           <FadeInView style={{ marginTop: Spacing.one }}>
-            <FieldLabel>Localidades de: {selectedPartido.equipoLocal} vs {selectedPartido.equipoVisita}</FieldLabel>
+            <FieldLabel>Selecciona localidad y sección — {selectedPartido.equipoLocal} vs {selectedPartido.equipoVisita}</FieldLabel>
             {loadingLocalidades ? (
               <View style={styles.loadingRow}>
                 <ActivityIndicator color={theme.text} />
                 <ThemedText type="small">Cargando localidades...</ThemedText>
               </View>
+            ) : localidadesSeleccion.length === 0 ? (
+              <ThemedText type="small" themeColor="textSecondary">
+                No hay localidades disponibles
+              </ThemedText>
             ) : (
-              <View style={styles.localidadesContainer}>
-                {localidadesSeleccion.length === 0 ? (
-                  <ThemedText type="small" themeColor="textSecondary">
-                    No hay localidades disponibles
-                  </ThemedText>
-                ) : (
-                  localidadesSeleccion.map((localidad, idx) => {
-                    const precioBase = localidad.precio;
-                    const iva = precioBase * 0.15;
-                    const totalUnitario = precioBase + iva;
-                    const cantidadNum = localidad.asientos.length;
-                    
-                    return (
-                        <View
-                          key={localidad.codigoLocalidad}
-                          style={[
-                            styles.localidadRow,
-                            {
-                              backgroundColor: cantidadNum > 0 ? theme.accentSoft : theme.background,
-                              borderColor: theme.stroke,
-                              flexDirection: !isWide ? 'column' : 'row',
-                              alignItems: !isWide ? 'flex-start' : 'center',
-                            },
-                          ]}>
-                        <View style={styles.localidadInfo}>
-                          <ThemedText
-                            type="smallBold"
-                            style={{ color: cantidadNum > 0 ? theme.accent : theme.text }}>
-                            {localidad.codigoLocalidad}
-                          </ThemedText>
-                          <ThemedText type="small" themeColor="textSecondary">
-                            Disponibles: {localidad.disponibilidad} (Cap: {localidad.capacidad})
-                          </ThemedText>
-                          <View style={styles.priceBreakdown}>
-                            <ThemedText type="small" themeColor="textSecondary">Base: {formatMoney(precioBase)}</ThemedText>
-                            <ThemedText type="smallBold">Total c/IVA: {formatMoney(totalUnitario)} c/u</ThemedText>
-                          </View>
-                        </View>
-                        
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.one, alignSelf: !isWide ? 'flex-end' : 'auto', marginTop: !isWide ? Spacing.one : 0 }}>
-                          {cantidadNum > 0 && (
-                            <ThemedText type="smallBold" style={{ color: theme.accent }}>
-                              {cantidadNum} seleccionados
-                            </ThemedText>
-                          )}
-                          <ActionButton 
-                            label="Ver Asientos" 
-                            variant="primary"
-                            onPress={() => setSeatMapLoc(localidad)}
-                          />
-                        </View>
-                      </View>
-                    );
-                  })
-                )}
-              </View>
+              <StadiumMap
+                localidades={localidadesSeleccion}
+                onSelectSection={(localidad, sectionIndex) => {
+                  setSeatMapInitialSection(sectionIndex);
+                  setSeatMapLoc(localidad);
+                }}
+              />
             )}
           </FadeInView>
         )}
